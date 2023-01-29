@@ -14,4 +14,6 @@ Lee-Moore
 
 ![](img/leemoore.gif)
 
+A*
+
 ![](img/astar.gif)
