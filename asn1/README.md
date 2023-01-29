@@ -12,7 +12,7 @@
 
 Lee-Moore
 
-![](img/leemoore.gif)
+![](img/leemooore.gif)
 
 A*
 
