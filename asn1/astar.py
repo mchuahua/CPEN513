@@ -20,8 +20,6 @@ def calc_closest(net, grid, x, y):
                     min = tempv
                     temp[0] = i
                     temp[1] = j
-    print(f'minium: {min}')
-    print(f'location of closest net point: {temp[1]},{temp[0]}')
     return min, temp[1], temp[0]
 
 def cost(x1, x2, x3, y1, y2, y3):
