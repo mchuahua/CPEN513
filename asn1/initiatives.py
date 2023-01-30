@@ -46,7 +46,7 @@ def initiative(benchmark, plot_frame, update_interval, plot_final_only):
         priority_queue.append([num+retries, i])
     reset_grid = deepcopy(grid)
     for asdf in range(retries):
-        print(f'Iteration: {asdf}')
+        # print(f'Iteration: {asdf}')
         # print(priority_queue)
         totali=0
         # Reset ok flag
@@ -58,7 +58,7 @@ def initiative(benchmark, plot_frame, update_interval, plot_final_only):
         # Base A* algorithm except for ok flag that notes that the current net failed to route and we use priority queue 
         for z, iter in enumerate(priority_queue):
             wire = iter[1]
-            print(wire)
+            # print(wire)
             # Set colour
             colour = grid[wire[0][1]][wire[0][0]]
             # Pre-emptively clear grid first, so all subsequent pins will be connected to the main net (otherwise they might make their own separate net)
