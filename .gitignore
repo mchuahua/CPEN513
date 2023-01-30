@@ -1,4 +1,4 @@
-*.pdf
+Paper*
 *.ipynb*
 *benchmarks*
 *pycache*
