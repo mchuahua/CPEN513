@@ -4,7 +4,7 @@ from plot import *
 from leemoore import *
 from astar import *
 
-def run(name, update_interval, plot_final_only):
+def run(benchmarks, name, update_interval, plot_final_only):
     '''
     Helper function to run leemoore and astar algorithm, with plot animation.
     Inputs: Benchmark name, update interval for animation, plot final only boolean
@@ -40,7 +40,7 @@ def main():
 
     # Individual run
     name = 'stanley'
-    run(name, update_interval=0.01, plot_final_only=True)
+    run(benchmarks, name, update_interval=0.01, plot_final_only=True)
 
     # Run all 
     # for name in names:

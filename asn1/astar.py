@@ -6,6 +6,7 @@ import operator
 def calc_closest(net, grid, x, y):
     '''
     Calculates the closest point to an existing net given a grid and your current x,y coordinate
+    Inputs: working net colour value, 2d grid, xy coordinates of pin 
     '''
     min = 999
     temp = [0, 0]

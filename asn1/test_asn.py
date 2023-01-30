@@ -87,3 +87,52 @@ def test_workspace():
             for val in row:
                 assert val == dict()
 
+#####################
+# A* tests
+#####################
+def test_manhattan():
+    '''
+    This function contains 1 test:
+    - Tests that the manhattan distance is computed properly
+    '''
+    for i in range(10):
+        for j in range (10):
+            for k in range (10):
+                for l in range (10):
+                    assert manhattan(i,j,k,l) == (abs(i-j) + abs(k-l))
+
+def test_cost():
+    '''
+    This function contains 1 test:
+    - Tests that the cost is computed properly
+    '''
+    for i in range(10):
+        for j in range (10):
+            for k in range (10):
+                for l in range (10):
+                    for a in range (10):
+                        for b in range (10):
+                            assert cost(i,j,k,l,a,b) == (abs(i-j) + abs(l-a)) + (abs(j-k) + abs(a-b))
+
+def test_calcclosest():
+    '''
+    This function contains 1 test:
+    - Tests that the calc closest function is computed properly
+    '''
+    temp = []
+    # construct grid
+    for i in range(10):
+        temp2 = []
+        for j in range(10):
+            temp2.append(j)
+        temp.append(temp2)
+
+    # Check calc closest is working properly
+    for i in range(1,10):
+        min, x, y = calc_closest(1, temp, i, i)
+        assert min == i-1 
+        assert x == 1
+        assert y == i
+
+
+
