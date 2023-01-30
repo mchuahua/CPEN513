@@ -48,7 +48,7 @@ def astar(benchmark, plot_frame, update_interval, plot_final_only):
         colour = grid[wire[0][1]][wire[0][0]]
         # Pre-emptively clear grid first, so all subsequent pins will be connected to the main net (otherwise they might make their own separate net)
         for pin in wire[2:]:
-            grid[pin[1]][pin[0]] = -1
+            grid[pin[1]][pin[0]] = 0
         # Connect every pin
         for first, pin in enumerate(wire):
             # Reset workspace after every expansion

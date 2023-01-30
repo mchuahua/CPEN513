@@ -3,7 +3,7 @@ import numpy as np
 
 
 # Colour definitions 
-COLOURS = {'white': 0, 'working': 9, 'obstacle': 10}
+COLOURS = {'white': 0, 'source': 1, 'sink': 2, 'working': 9, 'obstacle': 10}
 
 def putname(folder, match):
     '''

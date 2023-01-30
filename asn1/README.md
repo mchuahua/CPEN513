@@ -1,10 +1,13 @@
 # Pre-requisites
 
-`pip install matplotlib`
+ - Benchmark `*.infile` circuits within a subdirectory named `benchmarks`
+ - `pip install matplotlib`
+ - (optional) `pip install pytest`
 
 # Usage
 
-`py asn1.py`
+ - `py asn1.py` for visualizing A* and Lee-Moore 
+ - `pytest` for running unit tests
 
 ---
 

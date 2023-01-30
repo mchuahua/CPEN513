@@ -23,7 +23,7 @@ def leemoore(benchmark, plot_frame, update_interval, plot_final_only):
         colour = benchmark['grid'][wire[0][1]][wire[0][0]]
         # Pre-emptively clear grid first, so all subsequent pins will be connected to the main net (otherwise they might make their own separate net)
         for pin in wire[2:]:
-            grid[pin[1]][pin[0]] = -1
+            grid[pin[1]][pin[0]] = 0
         # Connect every pin
         for pin in wire:
             # Reset workspace after every expansion
@@ -36,7 +36,7 @@ def leemoore(benchmark, plot_frame, update_interval, plot_final_only):
             grid[pin[1]][pin[0]] = -1
             # Working grid for animation
             working_grid = deepcopy(grid)
-            # Expansion until any pin or wire is reached. Check all 4 sides
+            # Expansion until any pin or wire is reached. Check all 4 sides. i is used to keep track of cells visited
             i = 0
             while(1):
                 try:
@@ -48,9 +48,6 @@ def leemoore(benchmark, plot_frame, update_interval, plot_final_only):
 
                 x = working['x']
                 y = working['y']
-                # if q == 2:
-                # print(f'x: {x} y: {y}')
-                    # print(f'current {current}')
                 # Check each direction for expansion        
                 # Left check
                 if ((x > 0) & (workspace[y][x-1] == dict())):
@@ -116,8 +113,7 @@ def leemoore(benchmark, plot_frame, update_interval, plot_final_only):
                 working = workspace[working['prev_y']][working['prev_x']]
                 # print(f'working: {working}')
                 grid[working['y']][working['x']] = colour
-
-           
+    
         # print(grid)
         # break
     print(f'Total cells visited: {totali}')
