@@ -7,14 +7,16 @@ from initiatives import *
 
 #########################################
 # Modify these variables
-single_circuit = True
-single_circuit_name = 'stdcell'
-all_circuits = False
-plot_empty = False
-plot_leemore = False
-plot_astar = True
-plot_initative = True
-pausetime = 1 # in seconds
+single_circuit = True           # If displaying single circuit is true, all circuits should be false
+single_circuit_name = 'stdcell' # Name of the benchmark circuit for single circuit
+all_circuits = False            # If displaying all circuits is true, single circuit should be false
+plot_empty = False              # Displays the benchmark circuit without any routes
+plot_leemoore = False           # Displays the leemoore routing algorithm
+plot_astar = True               # Displays the A* routing algorithm
+plot_initative = True           # Displays the A* + Initiative 1,2 routing algorithm
+plot_final_only = True          # Plot final route only. Disable if viewing intermediate progress is desired
+update_interval = 0.01          # Interval speed for intermediate progress. Smaller is faster. Has no effect if plot final only is True
+pausetime = 1                   # in seconds
 #########################################
 
 def run(benchmarks, name, update_interval, plot_final_only):
@@ -31,7 +33,7 @@ def run(benchmarks, name, update_interval, plot_final_only):
         frame = plot(test)
         plt.title("Empty")
         plt.pause(pausetime)
-    if plot_leemore:
+    if plot_leemoore:
         test = benchmarks[name]
         # Initialize benchmark again just in case
         initialize_benchmark(test)
@@ -72,12 +74,12 @@ def main():
 
     # # Individual run
     if single_circuit:
-        run(benchmarks, single_circuit_name, update_interval=0.01, plot_final_only=True)
+        run(benchmarks, single_circuit_name, update_interval, plot_final_only)
 
     # Run all 
     if all_circuits:
         for name in names:
-            run(benchmarks, name, update_interval=0.01, plot_final_only=True)
+            run(benchmarks, name, update_interval, plot_final_only)
 
     # Pause to see the routes
     plt.pause(10000)

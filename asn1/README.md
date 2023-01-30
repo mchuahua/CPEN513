@@ -8,6 +8,7 @@
 
  - `py asn1.py` for visualizing A* and Lee-Moore 
  - `pytest` for running unit tests
+ - Open `asn1.py` to modify variables for configuration
 
 ---
 
