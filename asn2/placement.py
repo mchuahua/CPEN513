@@ -57,6 +57,8 @@ def swap_propose(circuit, type='both'):
     cell2 = cell1
     while(cell2 == cell1):
         cell2 = random.choice(random.choice(circuit['grid_list']))
+    # circuit['proposed'] = [cell1, cell2]
+    swap_cells(circuit, cell1, cell2)
 
     recalculate_nets = []
     # Find all nets affected
@@ -72,6 +74,17 @@ def swap_propose(circuit, type='both'):
 
     return proposed_cost, cell1, cell2, hpwl_list
 
+def swap_cells(circuit, cell1, cell2):
+    '''
+    Update cell list pointers. 
+    Index is needed to temporarily prevent updating cell1 before checking if cell2 exists. 
+    This prevents multiple cells in the same location.
+    '''
+    index = circuit['cell_list'].index(cell1)
+    if cell2 in circuit['cell_list']:
+        circuit['cell_list'][circuit['cell_list'].index(cell2)] = cell1
+    circuit['cell_list'][index] = cell2
+
 def swap(circuit, cell1, cell2, hpwl_list):
     '''
     Swap cell1 and cell2. Switches the cell grid pointers around. Also switches the hpwl dependencies around.
@@ -83,11 +96,7 @@ def swap(circuit, cell1, cell2, hpwl_list):
     circuit['grid'][cell2[1]][cell2[0]] = deepcopy(circuit['grid'][cell1[1]][cell1[0]] )
     circuit['grid'][cell1[1]][cell1[0]] = deepcopy(temp)
 
-    # Update cell list pointers. Index is needed to temporarily prevent updating cell1 before checking if cell2 exists. This prevents multiple cells in the same location.
-    index = circuit['cell_list'].index(cell1)
-    if cell2 in circuit['cell_list']:
-        circuit['cell_list'][circuit['cell_list'].index(cell2)] = cell1
-    circuit['cell_list'][index] = cell2
+    # swap_cells(circuit, cell1, cell2)
   
 
 def hpwl(circuit, init=False, changed=None):
@@ -102,9 +111,9 @@ def hpwl(circuit, init=False, changed=None):
             hpwl_list[i] = calc_hpwl(circuit, i, init=True)
     else:
         hpwl_list = deepcopy(circuit['hpwl_list'])
-        for i in range(len(changed)):
+        for i in changed:
             old_values_sum += hpwl_list[i]
-            hpwl_list[i] = calc_hpwl(circuit, i, init=True)
+            hpwl_list[i] = calc_hpwl(circuit, i, init=False)
             new_values_sum += hpwl_list[i]
     
     return hpwl_list, new_values_sum-old_values_sum 

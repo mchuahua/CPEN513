@@ -11,7 +11,7 @@ from sa import *
 def main():
     # Load data into circuits dict and names list
     circuits, names = dataloader()
-
+    c = 0
     # Initialize each circuit
     for circuit in circuits:
         x = circuits[circuit]
@@ -20,14 +20,17 @@ def main():
         init_normal(x)
         hpwl(x, init=True)
         calc_cost(x, update=True)
+        print(circuit)
+        cost = x['cost']
+        print(f'Initial cost: {cost}')
+        # print(x)
 
-        print(x['cost'])
-        print(x)
-
-        simulated_annealing(x, threshold = 10, start_temp=100, num_iters=10, beta=0.9)
-        print(x['cost'])
-        print(x)
-
+        simulated_annealing(x, threshold = .001, start_temp=100, num_iters=100, beta=0.99)
+        cost = x['cost']
+        print(f'Final cost: {cost}')
+        # print(x)
+        c += cost
+    print(f'Avg cost: {c/len(names)}')
     # # Individual run
     # if single_circuit:
     #     run(benchmarks, single_circuit_name, update_interval, plot_final_only)

@@ -50,12 +50,15 @@ def single_pass(circuit=None, T=100):
     r = random.random()
 
     # Swap if (r < e^(-c/T))
-    if (r < exp(-c/T)):
+    if (r < np.exp(-c/T)):
         swap(circuit, cell1, cell2, hpwl_list)
         # Update cost outside of the swap
         circuit['cost'] += c
         swapped = True
-    
+    # Revert the swap because it was swapped during proposal to calculate the new hpwl
+    else:
+        swap_cells(circuit, cell2, cell1)
+
     return swapped
 
 def lower_temperature(temp, beta, std_arr, format='simple'):
