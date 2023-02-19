@@ -16,9 +16,8 @@ def readline(bmfile):
     line = bmfile.readline().split(' ')
     if line[0] == "\n":    
         line = bmfile.readline().split(' ')
-    print(line)
+    # print(line)
     return line
-
 
 def dataloader(folder='./ass2_files', filesuffix='8a.txt'):
     '''
@@ -42,6 +41,7 @@ def dataloader(folder='./ass2_files', filesuffix='8a.txt'):
         connections = int(coord[1])
         benchmarks[filename]['size'] = (int(coord[2]), int(coord[3]))
         benchmarks[filename]['cells'] = size
+        benchmarks[filename]['connections'] = connections
         print(f'cells: {size}, connections: {connections}, gridx: {coord[2]}, gridy: {coord[3]}')
         benchmarks[filename]['nets'] = []
         # Go through all nets
@@ -51,12 +51,19 @@ def dataloader(folder='./ass2_files', filesuffix='8a.txt'):
             tempstr = readline(bmfile)
             logic_size = int(tempstr[0])
             for j in range(logic_size):
-                arr.append((logic_size, int(tempstr[1].split("\\")[0])))
+                arr.append(int(tempstr[j+1]))
             benchmarks[filename]['nets'].append(arr.copy())
         
         bmfile.close()
     return benchmarks, names
 
-# circuit_dict, names = dataloader()
-# print(names)
-# print(circuit_dict)
+
+
+
+
+# def init_workspace(benchmark):
+#     '''
+#     Initializes the workspace (basically a sctrachpad for the searching algos).
+#     '''
+#     dictlist = [dict() for x in range(benchmark['size'][0])]
+#     benchmark['workspace'] = [dictlist.copy() for x in range(benchmark['size'][1])]
