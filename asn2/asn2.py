@@ -6,6 +6,7 @@
 
 from dataloader import *
 from placement import *
+from sa import *
 
 def main():
     # Load data into circuits dict and names list
@@ -14,13 +15,19 @@ def main():
     # Initialize each circuit
     for circuit in circuits:
         x = circuits[circuit]
-        
+
         initialize(x)
         init_normal(x)
-        init_hpwl(x)
-        calc_cost(x)
+        hpwl(x, init=True)
+        calc_cost(x, update=True)
 
-    print(circuits)
+        print(x['cost'])
+        print(x)
+
+        simulated_annealing(x, threshold = 10, start_temp=100, num_iters=10, beta=0.9)
+        print(x['cost'])
+        print(x)
+
     # # Individual run
     # if single_circuit:
     #     run(benchmarks, single_circuit_name, update_interval, plot_final_only)
