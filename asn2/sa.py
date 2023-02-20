@@ -17,13 +17,17 @@ do {
 import random
 from placement import *
 from math import exp
+from plot import *
 
 def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, beta=0.9):
     T = start_temp
-    
+    temp_arr = []
+    cost_arr = []
+    x = []
     while (T > threshold):
         std_arr = []
-
+        temp_arr.append(T)
+        cost_arr.append(circuit['cost'])
         # Figure out if we want to or d'not want to swap
         for i in range(num_iters):
             if single_pass(circuit, T):
@@ -33,6 +37,9 @@ def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, 
         
         # Reduce T.
         T = lower_temperature(T, beta, std_arr)
+
+        # TODO: some rolling plotting stuff
+        update_plot(x, cost_arr, circuit, 0.0001)
 
 
 def single_pass(circuit=None, T=100):

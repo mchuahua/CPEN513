@@ -1,17 +1,17 @@
 # Goal is to minimize halfperimeter of smallest bounding box containing all pins for each net
 
-
-
-
-
 from dataloader import *
 from placement import *
 from sa import *
+from time import perf_counter
+from plot import *
 
-def main():
+def main(th, iters):
     # Load data into circuits dict and names list
     circuits, names = dataloader()
     c = 0
+
+    t1 = perf_counter()
     # Initialize each circuit
     for circuit in circuits:
         x = circuits[circuit]
@@ -22,26 +22,20 @@ def main():
         calc_cost(x, update=True)
         print(circuit)
         cost = x['cost']
-        print(f'Initial cost: {cost}')
+        # print(f'Initial cost: {cost}')
         # print(x)
+        
+        plot(x)
 
-        simulated_annealing(x, threshold = .001, start_temp=100, num_iters=100, beta=0.99)
+        simulated_annealing(x, threshold = th, start_temp=100, num_iters=iters, beta=0.99)
         cost = x['cost']
         print(f'Final cost: {cost}')
         # print(x)
         c += cost
     print(f'Avg cost: {c/len(names)}')
-    # # Individual run
-    # if single_circuit:
-    #     run(benchmarks, single_circuit_name, update_interval, plot_final_only)
-
-    # # Run all 
-    # if all_circuits:
-    #     for name in names:
-    #         run(benchmarks, name, update_interval, plot_final_only)
-
-    # # Pause to see the routes
-    # plt.pause(10000)
+    print(f'time elapsed: {perf_counter()-t1}')
 
 if __name__ == '__main__':
-    main()
+    main(0.001, 100)
+    main(0.001, 1000)
+    main(0.00001, 1000)

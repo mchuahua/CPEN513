@@ -19,7 +19,7 @@ def readline(bmfile):
     # print(line)
     return line
 
-def dataloader(folder='./ass2_files', filesuffix='.txt'):
+def dataloader(folder='./ass2_files', filesuffix='8a.txt'):
     '''
     Data loader into benchmark dict from netlist file, assuming run location contains 'ass2_files' folder
     '''
@@ -31,7 +31,7 @@ def dataloader(folder='./ass2_files', filesuffix='.txt'):
     for benchmark_file in benchmark_files:
         filename = benchmark_file.split('/')[-1].split('.')[0]
         names.append(filename)
-        print(filename)
+        # print(filename)
         # Append benchmark file name as a dict into benchmarks
         benchmarks[filename] = {}
         bmfile = open(benchmark_file)
@@ -42,7 +42,7 @@ def dataloader(folder='./ass2_files', filesuffix='.txt'):
         benchmarks[filename]['size'] = (int(coord[2]), int(coord[3]))
         benchmarks[filename]['cells'] = size
         benchmarks[filename]['connections'] = connections
-        print(f'cells: {size}, connections: {connections}, gridx: {coord[2]}, gridy: {coord[3]}')
+        # print(f'cells: {size}, connections: {connections}, gridx: {coord[2]}, gridy: {coord[3]}')
         benchmarks[filename]['nets'] = []
         # Go through all nets
         for i in range(connections):
