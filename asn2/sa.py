@@ -39,7 +39,7 @@ def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, 
         T = lower_temperature(T, beta, std_arr)
 
         # TODO: some rolling plotting stuff
-        update_plot(x, cost_arr, circuit, 0.0001)
+        update_plot(x, cost_arr, temp_arr, circuit, 0.0001)
 
 
 def single_pass(circuit=None, T=100):

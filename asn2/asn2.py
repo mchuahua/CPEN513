@@ -37,5 +37,5 @@ def main(th, iters):
 
 if __name__ == '__main__':
     main(0.001, 100)
-    main(0.001, 1000)
-    main(0.00001, 1000)
+    # main(0.001, 1000)
+    # main(0.00001, 1000)

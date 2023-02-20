@@ -19,7 +19,7 @@ def readline(bmfile):
     # print(line)
     return line
 
-def dataloader(folder='./ass2_files', filesuffix='8a.txt'):
+def dataloader(folder='./ass2_files', filesuffix='.txt'):
     '''
     Data loader into benchmark dict from netlist file, assuming run location contains 'ass2_files' folder
     '''
@@ -34,6 +34,7 @@ def dataloader(folder='./ass2_files', filesuffix='8a.txt'):
         # print(filename)
         # Append benchmark file name as a dict into benchmarks
         benchmarks[filename] = {}
+        benchmarks[filename]['name'] = filename
         bmfile = open(benchmark_file)
         # First line is number of cells, number of connections between cells, and x,y
         coord = readline(bmfile)
