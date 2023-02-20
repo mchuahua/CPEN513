@@ -55,24 +55,24 @@ def init_cluster(circuit):
             x+=1
          
 
-def init_normal(circuit):
+def init_normal(circuit, cluster=True):
     '''
     Initialize cells by placing cells just from the beginning at (0,0) -> size
     '''
-    x,y = 0,0
-    size = circuit['cells']
-    xmax = circuit['size'][0]
+    if cluster:
+        init_cluster(circuit)
+    else:
+        x,y = 0,0
+        size = circuit['cells']
+        xmax = circuit['size'][0]
+        
+        for i in range(size):
+            if (x == xmax):
+                x = 0
+                y += 1
+            circuit['cell_list'][i] = (x, y)
+            x+=1
     
-    for i in range(size):
-        if (x == xmax):
-            x = 0
-            y += 1
-        circuit['cell_list'][i] = (x, y)
-        x+=1
-    
-    init_cluster(circuit)
-
-
 def swap_propose(circuit, range_window=True, range_threshold_divisor=4):
     '''
     Propose a swap a random placed cell with the following logic:
@@ -141,12 +141,15 @@ def hpwl(circuit, init=False, changed=None):
     '''
     hwpl calculations for entire placed circuit
     '''
+    # These values are used to compute the costs for nets affected by the swap (when not init)
     old_values_sum = 0
     new_values_sum = 0
+    # Initialize entire hpwl list by calculating all nets
     if init:
         hpwl_list = circuit['hpwl_list']
         for i in range(len(hpwl_list)):
             hpwl_list[i] = calc_hpwl(circuit, i, init=True)
+    # Calculate for just the nets affected by the swap
     else:
         hpwl_list = deepcopy(circuit['hpwl_list'])
         for i in changed:
@@ -175,6 +178,7 @@ def calc_hpwl(circuit, net=0, init=False):
             ymax = y
             xmin = x
             xmax = x
+        # Determine max/min values
         else:
             if(ymin > y):
                 ymin = y
@@ -185,6 +189,7 @@ def calc_hpwl(circuit, net=0, init=False):
             if(xmin > x):
                 xmin = x
 
+    # Multiply by two in y dimension because we need to take into account the routing channel
     return (xmax-xmin) + ((ymax-ymin) * 2)
 
 def calc_cost(circuit, update=False):

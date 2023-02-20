@@ -1,29 +1,19 @@
-'''
-Start with random placement
-T = start temp
-do {
-    for some number of iterations {
-        randomly choose two cells to swap
-        c = cost(new) - cost(old)
-        r = random(0,1)
-        if (r < e^(-c/T)):
-            take move
-    }
-    reduce T. 
-} until some exit criteria, maybe some T threshold or no more moves being accepted
-
-
-'''
 import random
 from placement import *
 from math import exp
 from plot import *
 
-def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, dynamic_iters=True, k=.5, early_exit=True, early_exit_iters=50, beta=0.9):
+def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, update_interval=0.0001, dynamic_iters=True, k=.5, early_exit=True, early_exit_iters=50, early_exit_var=0.05,beta=0.9):
+    '''
+    Simulated annealing algorithm
+    '''
+    # Starting temperature for annealing
     T = start_temp
+    # Arrays to keep track of temperatures and costs for plotting. x is an array for the x axis iterations.
     temp_arr = []
     cost_arr = []
     x = []
+
     while (T > threshold):
         std_arr = []
         temp_arr.append(T)
@@ -39,10 +29,10 @@ def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, 
         if (early_exit & (len(x) > early_exit_iters) ):
             if (cost_arr[-1] == cost_arr[-2]):
                 varu = np.var(cost_arr[-early_exit_iters:])
-                if (varu < 0.05):
+                if (varu < early_exit_var):
                     return
 
-        # Figure out if we want to or d'not want to swap
+        # Swapping mechanism
         for i in range(num_iters):
             if single_pass(circuit, T):
                 std_arr.append(1)
@@ -52,11 +42,8 @@ def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, 
         # Reduce T.
         T = lower_temperature(T, beta, std_arr)
 
-        # Rolling plotting
-        update_plot(x, cost_arr, temp_arr, circuit, 0.0001)
-
-
-
+        # Rolling plotting graphics
+        update_plot(x, cost_arr, temp_arr, circuit, update_interval)
 
 def single_pass(circuit=None, T=100):
     '''
@@ -89,6 +76,7 @@ def lower_temperature(temp, beta, std_arr, format='simple'):
     Lowers the temperature according to what we want to do
     Simplest form: T = beta*T. More complex: T = T * e^0.7T/std of moves accepted
     '''
+    # Complex doesn't really work, might need to debug this a little more.
     if format == 'complex':
         std = np.std(std_arr)
         return temp * exp(0.7 * temp / std)

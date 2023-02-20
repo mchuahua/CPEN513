@@ -13,13 +13,14 @@ def plot(circuit):
     circuit['ax1'] = circuit['figure'].add_subplot(111, label='cost')
     circuit['ax2'] = circuit['figure'].add_subplot(111, label='temp', frame_on=False)
     
+    # Set up cost
     temp1, = circuit['ax1'].plot([],[],'b-')
     circuit['ax1'].set_xlabel('Iteration')
     circuit['ax1'].set_ylabel('Cost', color='Blue')
     circuit['ax1'].tick_params(axis='y', colors='Blue')
     circuit['ax1'].set_ylim(bottom=0)
 
-
+    # Set up temperature
     temp2, = circuit['ax2'].plot([],[],'r-')
     circuit['ax2'].set_ylabel('Temp', color='Red')
     circuit['ax2'].yaxis.set_label_position('right')
@@ -29,8 +30,7 @@ def plot(circuit):
     circuit['lines'].append(temp1)
     circuit['lines'].append(temp2)
 
-    # plt.legend()
-
+    # Name of plot
     name = circuit['name']
     plt.title(f'Simulated annealling of {name}')
     # autoscale
@@ -42,27 +42,20 @@ def plot(circuit):
 def update_plot(x, cost, temp, circuit, update_interval):
     '''
     Function used to update plot for animation
-    INputs: circuit dict, x, y, update interval
+    Inputs: circuit dict, x, y, update interval
     '''
+    # Update latest value in x axis
     x.append(len(cost))
-    # if update > 0:
-    # xvals = list(range(0,len(data)))
+    # Update cost and temperature
     circuit['lines'][0].set(xdata=x,ydata=cost)
     circuit['lines'][1].set(xdata=x,ydata=temp)
+    # Scaling the graph
     circuit['ax1'].relim()
     circuit['ax1'].autoscale_view()
     circuit['ax2'].relim()
     circuit['ax2'].autoscale_view()
-
-    # frame.set_xdata(xvals)
+    # Redraw
     circuit['figure'].canvas.draw()
     circuit['figure'].canvas.flush_events()
-    # plt.draw()
-    # plt.flush_events()
+    # update interval must be non-zero
     plt.pause(update_interval)
-
-    # elif final == True:
-    #     grid = data/10
-    #     frame.set_array(grid[::-1])
-    #     plt.draw()
-    #     plt.pause(5)

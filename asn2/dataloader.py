@@ -1,3 +1,5 @@
+# Mostly copied from asn1
+
 import os
 import numpy as np
 
@@ -57,14 +59,3 @@ def dataloader(folder='./ass2_files', filesuffix='.txt'):
         
         bmfile.close()
     return benchmarks, names
-
-
-
-
-
-# def init_workspace(benchmark):
-#     '''
-#     Initializes the workspace (basically a sctrachpad for the searching algos).
-#     '''
-#     dictlist = [dict() for x in range(benchmark['size'][0])]
-#     benchmark['workspace'] = [dictlist.copy() for x in range(benchmark['size'][1])]
