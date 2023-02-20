@@ -17,6 +17,7 @@ def plot(circuit):
     circuit['ax1'].set_xlabel('Iteration')
     circuit['ax1'].set_ylabel('Cost', color='Blue')
     circuit['ax1'].tick_params(axis='y', colors='Blue')
+    circuit['ax1'].set_ylim(bottom=0)
 
 
     temp2, = circuit['ax2'].plot([],[],'r-')
@@ -49,7 +50,6 @@ def update_plot(x, cost, temp, circuit, update_interval):
     circuit['lines'][0].set(xdata=x,ydata=cost)
     circuit['lines'][1].set(xdata=x,ydata=temp)
     circuit['ax1'].relim()
-    circuit['ax1'].set_ylim(bottom=cost[-1]*.8)
     circuit['ax1'].autoscale_view()
     circuit['ax2'].relim()
     circuit['ax2'].autoscale_view()
