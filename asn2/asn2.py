@@ -27,7 +27,7 @@ def main(th, iters):
         
         plot(x)
 
-        simulated_annealing(x, threshold = th, start_temp=100, num_iters=iters, beta=0.99)
+        simulated_annealing(x, threshold = th, start_temp=10, num_iters=iters, dynamic_iters=True, beta=0.95, k=1)
         cost = x['cost']
         print(f'Final cost: {cost}')
         # print(x)

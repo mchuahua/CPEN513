@@ -21,11 +21,39 @@ def initialize(circuit):
     circuit['hpwl_list'] = hpwl
     circuit['grid_list'] = grid_list
 
-def init_random(circuit):
+##########################################
+# Initiative 3: initial clustering heuristic structure
+##########################################
+def init_cluster(circuit):
     '''
-    Initialize cells by placing cells at random throughout the entire valid circuit size.
+    Initialize cells by pre-sorting nets (by size) to determine clusters of cells and place in the circuit.
     '''
-    pass
+    nets = sum(sorted(circuit['nets'], key=len, reverse=True), [])
+    
+    x,y=0,0
+    size = circuit['cells']
+    xmax = circuit['size'][0]
+    ymax = circuit['size'][1]
+    start_location = int(((xmax * ymax) - size)/2)
+    for i in range(start_location):
+        if (x == xmax):
+            x = 0
+            y += 1
+        x+=1
+    cells = [x for x in range(size)]
+    
+    # Place all cells in net
+    nets = nets + cells
+    for cell in nets:
+        # if it is in the cells list, remove it and place it
+        if cell in cells:
+            cells.remove(cell)
+            if (x == xmax):
+                x = 0
+                y += 1
+            circuit['cell_list'][cell] = (x, y)
+            x+=1
+         
 
 def init_normal(circuit):
     '''
@@ -42,14 +70,13 @@ def init_normal(circuit):
         circuit['cell_list'][i] = (x, y)
         x+=1
     
+    init_cluster(circuit)
 
 
-def swap_propose(circuit, type='both'):
+def swap_propose(circuit, range_window=True, range_threshold_divisor=4):
     '''
-    Propose a swap a random placed cell with one of the following logics:
-    - empty: swap with an empty cell
-    - placed: swap with another random existing placed cell
-    - both: randomly choose empty or placed
+    Propose a swap a random placed cell with the following logic:
+    - both: randomly choose any other cell, be it empty or placed
     '''
     # First cell must be a cell that is placed (so that we don't choose two empty cells which is useless computation)
     cell1 = random.choice(circuit['cell_list'])
@@ -57,6 +84,17 @@ def swap_propose(circuit, type='both'):
     cell2 = cell1
     while(cell2 == cell1):
         cell2 = random.choice(random.choice(circuit['grid_list']))
+
+        ########################################## 
+        # Initiative 4: range windows
+        ##########################################
+        if range_window:
+            range = (int(circuit['size'][0]/range_threshold_divisor), int(circuit['size'][1]/range_threshold_divisor))
+            asdf = (abs(cell1[1]-cell2[1])<range[1])
+            asdf2 = (abs(cell1[0]-cell2[0])<range[0])
+            while((abs(cell1[1]-cell2[1])>range[1]) or (abs(cell1[0]-cell2[0])>range[0])):
+                cell2 = random.choice(random.choice(circuit['grid_list']))
+
     # circuit['proposed'] = [cell1, cell2]
     swap_cells(circuit, cell1, cell2)
 
@@ -150,6 +188,9 @@ def calc_hpwl(circuit, net=0, init=False):
     return (xmax-xmin) + ((ymax-ymin) * 2)
 
 def calc_cost(circuit, update=False):
+    '''
+    calculates cost for a given circuit by summing all of its hwpl costs for each net
+    '''
     sum = 0
     for i in circuit['hpwl_list']:
         sum +=i

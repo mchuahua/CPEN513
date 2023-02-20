@@ -19,7 +19,7 @@ from placement import *
 from math import exp
 from plot import *
 
-def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, beta=0.9):
+def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, dynamic_iters=True, k=.5, early_exit=True, early_exit_iters=50, beta=0.9):
     T = start_temp
     temp_arr = []
     cost_arr = []
@@ -28,6 +28,20 @@ def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, 
         std_arr = []
         temp_arr.append(T)
         cost_arr.append(circuit['cost'])
+        ##########################################
+        # Initiative 1: dynamic iterations
+        ##########################################
+        if (dynamic_iters):
+            num_iters = int(k * (circuit['cells'] ** (4/3)))
+        ##########################################
+        # Initiative 2: early exit
+        ##########################################
+        if (early_exit & (len(x) > early_exit_iters) ):
+            if (cost_arr[-1] == cost_arr[-2]):
+                varu = np.var(cost_arr[-early_exit_iters:])
+                if (varu < 0.05):
+                    return
+
         # Figure out if we want to or d'not want to swap
         for i in range(num_iters):
             if single_pass(circuit, T):
@@ -38,8 +52,10 @@ def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, 
         # Reduce T.
         T = lower_temperature(T, beta, std_arr)
 
-        # TODO: some rolling plotting stuff
+        # Rolling plotting
         update_plot(x, cost_arr, temp_arr, circuit, 0.0001)
+
+
 
 
 def single_pass(circuit=None, T=100):
