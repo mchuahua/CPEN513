@@ -12,5 +12,5 @@
 
 # Examples
 
-[![](https://markdown-videos.deta/youtube/{HeIz6wrVgZc})](https://youtu.be/{HeIz6wrVgZc})
+[![](https://markdown-videos.deta/youtube/HeIz6wrVgZc)](https://youtu.be/HeIz6wrVgZc)
 
