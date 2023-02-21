@@ -205,7 +205,7 @@ def calc_hpwl(circuit, net=0, init=False):
                 xmin = x
 
     # Multiply by two in y dimension because we need to take into account the routing channel
-    return (xmax-xmin) + ((ymax-ymin))
+    return (xmax-xmin) + ((ymax-ymin)*2)
 
 def calc_cost(circuit, update=False):
     '''

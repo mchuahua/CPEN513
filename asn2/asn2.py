@@ -33,11 +33,11 @@ def main(th, iters, plotting):
                             plotting=plotting,          # Enable/disable plotting
                             update_interval=0.0001,     # Controls how fast the graphics update
                             threshold = th,             # End temperature threshold 
-                            start_temp=17,              # Start temperature
-                            iters=10000,                # Max number of iterations. 
+                            start_temp=18,              # Start temperature
+                            iters=20000,                # Max number of iterations. 
                             dynamic_iters=True,         # Enable/disable dynamic iterations according to # cells
-                            beta=0.9,                   # How fast we want to lower the temperature
-                            k=1,                        # Controls how big the dynamic iterations is
+                            beta=0.995,                   # How fast we want to lower the temperature
+                            k= 2,                        # Controls how big the dynamic iterations is
                             early_exit=True,            # Enable/disable early exit
                             early_exit_iters=50,        # Specify how large the window for determining early exit should be
                             early_exit_var=0.05,        # Specify the variance threshold for the early exit window
