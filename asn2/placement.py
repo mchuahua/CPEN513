@@ -101,14 +101,14 @@ def swap_propose(circuit, range_window=True, range_threshold_min=4, range_thresh
 
             while((abs(cell1[1]-cell2[1])>range[1]) or (abs(cell1[0]-cell2[0])>range[0])):
                 # TODO: can be optimized to not randomly get cell from entire circuit, rather get cell from just that range window
-                if ((cell1[1]-range[1] < 0) & (cell1[0]-range[0] < 0)):
-                    cell2 = random.choice(random.choice(circuit['grid_list'][0:range[1]][0:range[0]]))
-                elif (cell1[1]-range[1] < 0):
-                    cell2 = random.choice(random.choice(circuit['grid_list'][0:range[1]]))
-                elif (cell1[0]-range[0] < 0):
-                    cell2 = random.choice(random.choice(circuit['grid_list'][:][0:range[0]]))
-                else:
-                    cell2 = random.choice(random.choice(circuit['grid_list']))
+                # if ((cell1[1]-range[1] < 0) & (cell1[0]-range[0] < 0)):
+                #     cell2 = random.choice(random.choice(circuit['grid_list'][0:range[1]][0:range[0]]))
+                # elif (cell1[1]-range[1] < 0):
+                #     cell2 = random.choice(random.choice(circuit['grid_list'][0:range[1]]))
+                # elif (cell1[0]-range[0] < 0):
+                #     cell2 = random.choice(random.choice(circuit['grid_list'][:][0:range[0]]))
+                # else:
+                cell2 = random.choice(random.choice(circuit['grid_list']))
                 
 
     # circuit['proposed'] = [cell1, cell2]
@@ -150,9 +150,6 @@ def swap(circuit, cell1, cell2, hpwl_list):
     circuit['grid'][cell2[1]][cell2[0]] = deepcopy(circuit['grid'][cell1[1]][cell1[0]] )
     circuit['grid'][cell1[1]][cell1[0]] = deepcopy(temp)
 
-    # swap_cells(circuit, cell1, cell2)
-  
-
 def hpwl(circuit, init=False, changed=None):
     '''
     hwpl calculations for entire placed circuit
@@ -167,7 +164,7 @@ def hpwl(circuit, init=False, changed=None):
         hpwl_list = circuit['hpwl_list']
         for i in range(len(hpwl_list)):
             hpwl_list[i] = calc_hpwl(circuit, i, init=True)
-    # Calculate for just the nets affected by the swap
+    # Calculate for just the nets affected by the swap, then return the difference of new and old.
     else:
         hpwl_list = deepcopy(circuit['hpwl_list'])
         for i in changed:
@@ -208,7 +205,7 @@ def calc_hpwl(circuit, net=0, init=False):
                 xmin = x
 
     # Multiply by two in y dimension because we need to take into account the routing channel
-    return (xmax-xmin) + ((ymax-ymin)*2)
+    return (xmax-xmin) + ((ymax-ymin))
 
 def calc_cost(circuit, update=False):
     '''
