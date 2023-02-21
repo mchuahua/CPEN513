@@ -73,7 +73,7 @@ def init_normal(circuit, cluster=True):
             circuit['cell_list'][i] = (x, y)
             x+=1
     
-def swap_propose(circuit, range_window=True, range_threshold_divisor=4):
+def swap_propose(circuit, range_window=True, range_threshold_min=4, range_threshold_divisor=3):
     '''
     Propose a swap a random placed cell with the following logic:
     - both: randomly choose any other cell, be it empty or placed
@@ -89,11 +89,27 @@ def swap_propose(circuit, range_window=True, range_threshold_divisor=4):
         # Initiative 4: range windows
         ##########################################
         if range_window:
-            range = (int(circuit['size'][0]/range_threshold_divisor), int(circuit['size'][1]/range_threshold_divisor))
-            asdf = (abs(cell1[1]-cell2[1])<range[1])
-            asdf2 = (abs(cell1[0]-cell2[0])<range[0])
+            range = [int(circuit['size'][0]/range_threshold_divisor), int(circuit['size'][1]/range_threshold_divisor)]
+            if (range[0] < range_threshold_min):
+                range[0] = range_threshold_min
+                if range_threshold_min > int(circuit['size'][0]):
+                   range[0] = int(circuit['size'][0])
+            if (range[1] < range_threshold_min):
+                range[1] = range_threshold_min
+                if range_threshold_min > int(circuit['size'][1]):
+                   range[1] = int(circuit['size'][1])
+
             while((abs(cell1[1]-cell2[1])>range[1]) or (abs(cell1[0]-cell2[0])>range[0])):
-                cell2 = random.choice(random.choice(circuit['grid_list']))
+                # TODO: can be optimized to not randomly get cell from entire circuit, rather get cell from just that range window
+                if ((cell1[1]-range[1] < 0) & (cell1[0]-range[0] < 0)):
+                    cell2 = random.choice(random.choice(circuit['grid_list'][0:range[1]][0:range[0]]))
+                elif (cell1[1]-range[1] < 0):
+                    cell2 = random.choice(random.choice(circuit['grid_list'][0:range[1]]))
+                elif (cell1[0]-range[0] < 0):
+                    cell2 = random.choice(random.choice(circuit['grid_list'][:][0:range[0]]))
+                else:
+                    cell2 = random.choice(random.choice(circuit['grid_list']))
+                
 
     # circuit['proposed'] = [cell1, cell2]
     swap_cells(circuit, cell1, cell2)
@@ -141,6 +157,8 @@ def hpwl(circuit, init=False, changed=None):
     '''
     hwpl calculations for entire placed circuit
     '''
+    # Make sure size of hwpl list is == nets
+    assert len(circuit['hpwl_list']) == circuit['connections']
     # These values are used to compute the costs for nets affected by the swap (when not init)
     old_values_sum = 0
     new_values_sum = 0
@@ -190,7 +208,7 @@ def calc_hpwl(circuit, net=0, init=False):
                 xmin = x
 
     # Multiply by two in y dimension because we need to take into account the routing channel
-    return (xmax-xmin) + ((ymax-ymin) * 2)
+    return (xmax-xmin) + ((ymax-ymin)*2)
 
 def calc_cost(circuit, update=False):
     '''

@@ -3,26 +3,34 @@ from placement import *
 from math import exp
 from plot import *
 
-def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, update_interval=0.0001, dynamic_iters=True, k=.5, early_exit=True, early_exit_iters=50, early_exit_var=0.05,beta=0.9):
+def simulated_annealing(circuit, plotting=True, threshold = 10, start_temp=100, iters=100, range_window=True, range_window_min=3, update_interval=0.0001, dynamic_iters=True, k=.5, early_exit=True, early_exit_iters=50, early_exit_var=0.05,beta=0.9):
     '''
     Simulated annealing algorithm
     '''
     # Starting temperature for annealing
     T = start_temp
+    
     # Arrays to keep track of temperatures and costs for plotting. x is an array for the x axis iterations.
     temp_arr = []
     cost_arr = []
     x = []
+    num_iters = iters
+    ##########################################
+    # Initiative 1: dynamic iterations with max limit
+    ##########################################
+    if (dynamic_iters):
+        num_iters = int(k * (circuit['cells'] ** (4/3)))
+        if num_iters > iters:
+            num_iters = iters
+
+    # Initialize plot graphics for simulated anneal
+    plot(circuit, plotting, num_iters)
 
     while (T > threshold):
         std_arr = []
         temp_arr.append(T)
         cost_arr.append(circuit['cost'])
-        ##########################################
-        # Initiative 1: dynamic iterations
-        ##########################################
-        if (dynamic_iters):
-            num_iters = int(k * (circuit['cells'] ** (4/3)))
+
         ##########################################
         # Initiative 2: early exit
         ##########################################
@@ -34,7 +42,7 @@ def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, 
 
         # Swapping mechanism
         for i in range(num_iters):
-            if single_pass(circuit, T):
+            if single_pass(circuit, T, range_window, range_window_min):
                 std_arr.append(1)
             else:
                 std_arr.append(0)
@@ -43,9 +51,12 @@ def simulated_annealing(circuit, threshold = 10, start_temp=100, num_iters=100, 
         T = lower_temperature(T, beta, std_arr)
 
         # Rolling plotting graphics
+        if not plotting:
+            continue
+        # x.append(num_iters)
         update_plot(x, cost_arr, temp_arr, circuit, update_interval)
 
-def single_pass(circuit=None, T=100):
+def single_pass(circuit=None, T=100, range_window=True, range_window_min=3):
     '''
     Computes single pass of anneal
     Inputs: circuit, current temperature T
@@ -54,7 +65,7 @@ def single_pass(circuit=None, T=100):
     swapped = False
 
     #Randomly choose two cells to swap. Get cost difference of the random swap, and the cell locations
-    c, cell1, cell2, hpwl_list = swap_propose(circuit)
+    c, cell1, cell2, hpwl_list = swap_propose(circuit, range_window, range_window_min)
     
     # get random number from 0 to 1 
     r = random.random()

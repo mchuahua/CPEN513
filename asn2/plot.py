@@ -1,12 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot(circuit):
+def plot(circuit, plotting, iters):
     '''
     Plots and initializes circuit
     Inputs: circuit dict 
     Outputs: none.
     '''
+    if not plotting:
+        return
     # setup plot
     circuit['lines'] = []
     circuit['figure'] = plt.figure()
@@ -15,7 +17,7 @@ def plot(circuit):
     
     # Set up cost
     temp1, = circuit['ax1'].plot([],[],'b-')
-    circuit['ax1'].set_xlabel('Iteration')
+    circuit['ax1'].set_xlabel(f'Iteration (per {iters})')
     circuit['ax1'].set_ylabel('Cost', color='Blue')
     circuit['ax1'].tick_params(axis='y', colors='Blue')
     circuit['ax1'].set_ylim(bottom=0)
