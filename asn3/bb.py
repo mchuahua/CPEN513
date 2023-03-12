@@ -19,7 +19,7 @@ If you have a good initial solution, you can prune earlier
 (eg heuristic first)
 
 '''
-from copy import deepcopy
+from copy import copy as deepcopy
 best_cost = 9999
 cells = 0
 connections = 0
@@ -57,15 +57,19 @@ def branch_bound(current_assignment, next_node_to_assign, nets, left, right, cos
     global connections
     
     # Calculate label of current node. 
-    cost, temp_nets = calculate_label(deepcopy(current_assignment), deepcopy(next_node_to_assign), deepcopy(nets), deepcopy(cost))
-    # print(cost)
+    cost, temp_nets = calculate_label(current_assignment, next_node_to_assign, deepcopy(nets), cost)
+    # PRUNING: stop calculations for additional leaf nodes if cost is greater than global cost.
     if (cost < best_cost):
         current_assignment.append(next_node_to_assign)
         if len(current_assignment) < cells:
-            temp_next_node_L = [len(current_assignment), 0]
-            branch_bound(deepcopy(current_assignment), deepcopy(temp_next_node_L), deepcopy(temp_nets), deepcopy(left+1), deepcopy(right), deepcopy(cost))
-            temp_next_node_R = [len(current_assignment), 1]
-            branch_bound(deepcopy(current_assignment), deepcopy(temp_next_node_R), deepcopy(temp_nets), deepcopy(left), deepcopy(right+1), deepcopy(cost))
+            # PRUNING: Stop going left if left > half of the total cell size
+            if left < cells/2:
+                temp_next_node_L = [len(current_assignment), 0]
+                branch_bound(deepcopy(current_assignment), temp_next_node_L, temp_nets, left+1, right, cost)
+            # PRUNING: Stop going right if right > half of the total cell size
+            if right < cells/2:
+                temp_next_node_R = [len(current_assignment), 1]
+                branch_bound(deepcopy(current_assignment), temp_next_node_R, temp_nets, left, right+1, cost)
         else:
             # If even cell size, record best cost only if left and right are equal
             if not (cells%2) and (left == right):

@@ -22,7 +22,8 @@ def main():
     # Initialize each circuit
     # Do ugly 8 first because it's the smallest number of cells and connections
     for circuit in circuits:
-        if circuit != 'z4ml':
+        # if circuit != 'z4ml':
+        if circuit != 'cm162a':
         # if circuit != 'ugly8':
         # if circuit != 'z4ml':            
             continue
