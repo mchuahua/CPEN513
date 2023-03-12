@@ -20,6 +20,7 @@ If you have a good initial solution, you can prune earlier
 
 '''
 from copy import copy as deepcopy
+from multiprocessing import Process, Value
 best_cost = 9999
 cells = 0
 connections = 0
@@ -37,52 +38,61 @@ def init_bb(best_cost1, cells1, connections1, current_nets1):
     current_nets = current_nets1
     left = 1
     right = 1
-    branch_bound(deepcopy([[0, 0]]), deepcopy([1, 1]), deepcopy(current_nets), deepcopy(left), deepcopy(right))
-    right = 0
-    left = 2
-    branch_bound(deepcopy([[0, 0]]), deepcopy([1, 0]), deepcopy(current_nets), deepcopy(left), deepcopy(right))
+    globalbest = Value('i', best_cost1)
+    p1 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 1]), deepcopy(current_nets), 1, 1, 0, cells],))    
+    p2 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 0]), deepcopy(current_nets), 2, 0, 0, cells],))    
 
-    return best_cost
+    p1.start()
+    p2.start()
+    p1.join()
+    p2.join()
+    return globalbest.value
 
-def branch_bound(current_assignment, next_node_to_assign, nets, left, right, cost=0):
+def branch_bound(input_list):
     '''
     current_assignment: list of all nodes that have been assigned, in tuple
     next_node_to_assign: current node to assign, tuple (node #, left/right)
     current_nets: list of all nets that are not considered in cost
     best_cost: best cost found
     '''
-    global best_cost
-    global cells
-    global connections
     
+    global connections
+
+    best_cost = input_list[0]
+    current_assignment = input_list[1]
+    next_node_to_assign = input_list[2]
+    nets = input_list[3]
+    left = input_list[4]
+    right = input_list[5]
+    cost = input_list[6]
+    cells = input_list[7]
+    # print(f'best cost: {best_cost.value}')
+    # print(f'cost: {cost}')
     # Calculate label of current node. 
     cost, temp_nets = calculate_label(current_assignment, next_node_to_assign, deepcopy(nets), cost)
     # PRUNING: stop calculations for additional leaf nodes if cost is greater than global cost.
-    if (cost < best_cost):
+    if (cost < best_cost.value):
         current_assignment.append(next_node_to_assign)
         if len(current_assignment) < cells:
             # PRUNING: Stop going left if left > half of the total cell size
             if left < cells/2:
                 temp_next_node_L = [len(current_assignment), 0]
-                branch_bound(deepcopy(current_assignment), temp_next_node_L, temp_nets, left+1, right, cost)
+                branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_nets, left+1, right, cost, cells])
             # PRUNING: Stop going right if right > half of the total cell size
             if right < cells/2:
                 temp_next_node_R = [len(current_assignment), 1]
-                branch_bound(deepcopy(current_assignment), temp_next_node_R, temp_nets, left, right+1, cost)
+                branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_nets, left, right+1, cost, cells])
         else:
             # If even cell size, record best cost only if left and right are equal
             if not (cells%2) and (left == right):
-                best_cost = cost
-                print(f'Even cost: {cost}, best cost: {best_cost}, left: {left}, right: {right}')
+                best_cost.value = cost
+                print(f'Even cost: {cost}, best cost: {best_cost.value}, left: {left}, right: {right}')
                 print(f'Current assignment: {current_assignment}')                
             # If odd cell size, record best cost if left and right are off by at most 1
             elif (cells%2) and (abs(left-right) < 2):
-                best_cost = cost
-                print(f'Odd cost: {cost}, best cost: {best_cost}')
+                best_cost.value = cost
+                print(f'Odd cost: {cost}, best cost: {best_cost.value}')
                 print(f'Current assignment: {current_assignment}')
-            else:
-                # Shouldn't happen
-                assert False
 
 def calculate_label(current_assignments, current_node, current_nets, cost):
     '''

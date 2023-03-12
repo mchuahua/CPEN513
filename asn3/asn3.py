@@ -3,6 +3,7 @@
 from dataloader import *
 # from placement import *
 from bb import *
+# from bb_initiatives import *
 from time import perf_counter
 # from plot import *
 
@@ -22,11 +23,12 @@ def main():
     # Initialize each circuit
     # Do ugly 8 first because it's the smallest number of cells and connections
     for circuit in circuits:
+        print(circuit)
         # if circuit != 'z4ml':
-        if circuit != 'cm162a':
+        # if circuit != 'cm138a':
         # if circuit != 'ugly8':
         # if circuit != 'z4ml':            
-            continue
+        continue
         x = circuits[circuit]
         
         # Initialize values for branch and bound
