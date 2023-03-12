@@ -100,14 +100,6 @@ def swap_propose(circuit, range_window=True, range_threshold_min=4, range_thresh
                    range[1] = int(circuit['size'][1])
 
             while((abs(cell1[1]-cell2[1])>range[1]) or (abs(cell1[0]-cell2[0])>range[0])):
-                # TODO: can be optimized to not randomly get cell from entire circuit, rather get cell from just that range window
-                # if ((cell1[1]-range[1] < 0) & (cell1[0]-range[0] < 0)):
-                #     cell2 = random.choice(random.choice(circuit['grid_list'][0:range[1]][0:range[0]]))
-                # elif (cell1[1]-range[1] < 0):
-                #     cell2 = random.choice(random.choice(circuit['grid_list'][0:range[1]]))
-                # elif (cell1[0]-range[0] < 0):
-                #     cell2 = random.choice(random.choice(circuit['grid_list'][:][0:range[0]]))
-                # else:
                 cell2 = random.choice(random.choice(circuit['grid_list']))
                 
 
