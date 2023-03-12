@@ -2,8 +2,8 @@
 
 from dataloader import *
 # from placement import *
-from bb import *
-# from bb_initiatives import *
+# from bb import *
+from bb_initiatives import *
 from time import perf_counter
 # from plot import *
 
@@ -17,18 +17,18 @@ def main():
     circuits, names = dataloader()
     c = 0
 
-    # Start timer
-    t1 = perf_counter()
+   
     
     # Initialize each circuit
-    # Do ugly 8 first because it's the smallest number of cells and connections
     for circuit in circuits:
-        print(circuit)
-        # if circuit != 'z4ml':
+         # Start timer
+        t1 = perf_counter()
+        # print(circuit)
+        # if circuit != 'cm150a':
         # if circuit != 'cm138a':
         # if circuit != 'ugly8':
         # if circuit != 'z4ml':            
-        continue
+            # continue
         x = circuits[circuit]
         
         # Initialize values for branch and bound
@@ -44,8 +44,9 @@ def main():
         b = init_bb(best_cost, cells, connections, current_nets)
 
         print(f'best cost: {b}')
-    
-    print(f'Time elapsed: {perf_counter()-t1}')
+            
+        print(f'Time elapsed: {perf_counter()-t1}')
+
 
 if __name__ == '__main__':
     main()

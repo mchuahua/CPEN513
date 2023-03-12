@@ -20,11 +20,14 @@ If you have a good initial solution, you can prune earlier
 
 '''
 from copy import copy as deepcopy
+from random import shuffle
+
 best_cost = 9999
 cells = 0
 connections = 0
 left = 0
 right = 0
+current_nets = []
 
 def init_bb(best_cost1, cells1, connections1, current_nets1):
     global best_cost 
@@ -32,9 +35,12 @@ def init_bb(best_cost1, cells1, connections1, current_nets1):
     global connections
     global current_nets
     best_cost = best_cost1
+
     cells = cells1
     connections = connections1
     current_nets = current_nets1
+    # best_cost = init_best_cost_finder()
+
     left = 1
     right = 1
     branch_bound(deepcopy([[0, 0]]), deepcopy([1, 1]), deepcopy(current_nets), deepcopy(left), deepcopy(right))
@@ -121,3 +127,28 @@ def calculate_label(current_assignments, current_node, current_nets, cost):
         current_nets.pop(i)
     # print(f'[CALCULATE LABEL] Current cost: {cost}')
     return cost, current_nets
+
+
+# Heuristic to find better initial best cost
+def init_best_cost_finder(iterations=1000):
+    global best_cost 
+    global cells
+    global connections
+    global current_nets
+    
+    for p in range(iterations):
+        random_cell_list = [x for x in range(cells)]
+        # half on one side, half on the other.
+        shuffle(random_cell_list)
+        left = [[x, 0] for x in random_cell_list[0:int(cells/2)]]
+        right = [[x, 1] for x in random_cell_list[int(cells/2):]]
+        random_cell_list = left + right
+        random_cell_list.sort(key=lambda x: x[0])
+        cost = 0
+        nets = deepcopy(current_nets)
+        for x in random_cell_list:
+            cost, nets = calculate_label(random_cell_list, x, nets, cost)
+        if cost < best_cost:
+            best_cost = cost
+    print(f'Initial best cost: {best_cost}')
+    return best_cost
