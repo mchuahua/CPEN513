@@ -94,14 +94,7 @@ def calculate_label(current_assignments, current_node, current_nets, cost):
     '''
     Find cost of current node (cuts) by calculating ONLY current node's cuts
     '''
-    # print(cost)
     nets_to_remove = []
-    # Cost of current assignemnts is 0 if there's only one node
-
-    # print(f'[CALCULATE LABEL] Current Assignments: {current_assignments}')
-    # print(f'[CALCULATE LABEL] Current node: {current_node}')
-    # print(f'[CALCULATE LABEL] Current nets: {current_nets}')
-    # print(f'[CALCULATE LABEL] Current cost: {cost}')
     # Iterate through nets
     for idx, net in enumerate(current_nets):
         try:

@@ -3,7 +3,8 @@
 from dataloader import *
 # from placement import *
 # from bb import *
-from bb_initiatives import *
+# from bb_initiatives import *
+from bb_initiatives2 import *
 from time import perf_counter
 # from plot import *
 
@@ -17,22 +18,23 @@ def main():
     circuits, names = dataloader()
     c = 0
 
-   
+    # Start timer
     
     # Initialize each circuit
     for circuit in circuits:
-         # Start timer
         t1 = perf_counter()
+
         # print(circuit)
-        # if circuit != 'cm150a':
-        # if circuit != 'cm138a':
-        # if circuit != 'ugly8':
+        # if circuit != 'cc':
+        # if circuit != 'cm150a' and circuit != 'cm162a' and circuit != 'cm138a':
+        if circuit != 'twocm':
         # if circuit != 'z4ml':            
-            # continue
+            continue
         x = circuits[circuit]
         
         # Initialize values for branch and bound
         cells = x['cells']
+        
         connections = x['connections']
         best_cost = cells
         current_nets = x['nets']
@@ -42,7 +44,7 @@ def main():
         print(f'Nets: {current_nets}')
 
         b = init_bb(best_cost, cells, connections, current_nets)
-
+        
         print(f'best cost: {b}')
             
         print(f'Time elapsed: {perf_counter()-t1}')
@@ -50,4 +52,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
     

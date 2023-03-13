@@ -98,19 +98,15 @@ def branch_bound(input_list):
                 best_cost.value = cost
                 print(f'Odd cost: {cost}, best cost: {best_cost.value}')
                 print(f'Current assignment: {current_assignment}')
+            else: 
+                # Shouldn't happen
+                assert False
 
 def calculate_label(current_assignments, current_node, current_nets, cost):
     '''
     Find cost of current node (cuts) by calculating ONLY current node's cuts
     '''
-    # print(cost)
     nets_to_remove = []
-    # Cost of current assignemnts is 0 if there's only one node
-
-    # print(f'[CALCULATE LABEL] Current Assignments: {current_assignments}')
-    # print(f'[CALCULATE LABEL] Current node: {current_node}')
-    # print(f'[CALCULATE LABEL] Current nets: {current_nets}')
-    # print(f'[CALCULATE LABEL] Current cost: {cost}')
     # Iterate through nets
     for idx, net in enumerate(current_nets):
         try:
@@ -138,12 +134,15 @@ def calculate_label(current_assignments, current_node, current_nets, cost):
     return cost, current_nets
 
 # Heuristic to find better initial best cost
-def init_best_cost_finder(iterations=1000):
+def init_best_cost_finder(const=7):
     global best_cost 
     global cells
     global connections
     global current_nets
     
+    iterations = int((connections/10) ** (const))
+    print(f"Initial random iterations: {iterations}")
+
     for p in range(iterations):
         random_cell_list = [x for x in range(cells)]
         # half on one side, half on the other.

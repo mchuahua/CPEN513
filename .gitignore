@@ -2,3 +2,4 @@ Paper*
 *.ipynb*
 *benchmarks*
 *pycache*
+*.log

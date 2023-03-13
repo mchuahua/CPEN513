@@ -40,13 +40,14 @@ def init_bb(best_cost1, cells1, connections1, current_nets1):
     connections = connections1
     current_nets = current_nets1
 
+    # best_cost = 5
     best_cost = init_best_cost_finder()
 
     left = 1
     right = 1
     globalbest = Value('i', best_cost)
-    p1 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 1]), deepcopy(current_nets), 1, 1, 0, cells],))    
-    p2 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 0]), deepcopy(current_nets), 2, 0, 0, cells],))    
+    p1 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 1]), deepcopy(current_nets), 1, 1, 0, cells, True],))    
+    p2 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 0]), deepcopy(current_nets), 2, 0, 0, cells, True],))    
 
     p1.start()
     p2.start()
@@ -72,10 +73,16 @@ def branch_bound(input_list):
     right = input_list[5]
     cost = input_list[6]
     cells = input_list[7]
+    
     # print(f'best cost: {best_cost.value}')
     # print(f'cost: {cost}')
     # Calculate label of current node. 
-    cost, temp_nets = calculate_label(current_assignment, next_node_to_assign, deepcopy(nets), cost)
+    try: 
+        init = input_list[8]
+        cost, temp_nets = calculate_label(current_assignment, next_node_to_assign, nets, cost, False)
+    except: 
+        temp_nets = nets
+
     # PRUNING: stop calculations for additional leaf nodes if cost is greater than global cost.
     if (cost < best_cost.value):
         current_assignment.append(next_node_to_assign)
@@ -84,13 +91,13 @@ def branch_bound(input_list):
             # PRUNING: Stop going left if left > half of the total cell size
             if left < cells/2:
                 temp_next_node_L = [len(current_assignment), 0]
-                peek_cost_left, = calculate_label(current_assignment, next_node_to_assign, nets, cost, peek=True)
+                peek_cost_left,temp_left_nets = calculate_label(current_assignment, temp_next_node_L, deepcopy(temp_nets), cost)
             else:
                 peek_cost_left = -1
             # PRUNING: Stop going right if right > half of the total cell size
             if right < cells/2:
                 temp_next_node_R = [len(current_assignment), 1]
-                peek_cost_right, = calculate_label(current_assignment, next_node_to_assign, nets, cost, peek=True)
+                peek_cost_right,temp_right_nets = calculate_label(current_assignment, temp_next_node_R, deepcopy(temp_nets), cost)
             else: 
                 peek_cost_right = -1
 
@@ -98,11 +105,15 @@ def branch_bound(input_list):
             if (peek_cost_left > -1 and peek_cost_right > -1):
                 # Do left then right if left cost is less than right cost, or the same
                 if (peek_cost_left <= peek_cost_right):
-                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_nets, left+1, right, cost, cells])
-                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_nets, left, right+1, cost, cells])
+                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_left_nets, left+1, right, peek_cost_left, cells])
+                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_right_nets, left, right+1, peek_cost_right, cells])
                 else: 
-                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_nets, left, right+1, cost, cells])
-                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_nets, left+1, right, cost, cells])
+                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_right_nets, left, right+1, peek_cost_right, cells])
+                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_left_nets, left+1, right, peek_cost_left, cells])
+            elif (peek_cost_left > -1):
+                branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_left_nets, left+1, right, peek_cost_left, cells])                
+            elif (peek_cost_right > -1):
+                branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_right_nets, left, right+1, peek_cost_right, cells])            
         else:
             # If even cell size, record best cost only if left and right are equal
             if not (cells%2) and (left == right):
@@ -114,19 +125,15 @@ def branch_bound(input_list):
                 best_cost.value = cost
                 print(f'Odd cost: {cost}, best cost: {best_cost.value}')
                 print(f'Current assignment: {current_assignment}')
+            else:
+                # Shouldn't happen
+                assert False
 
-def calculate_label(current_assignments, current_node, current_nets, cost, peek=False):
+def calculate_label(current_assignments, current_node, current_nets, cost):
     '''
     Find cost of current node (cuts) by calculating ONLY current node's cuts
     '''
-    # print(cost)
     nets_to_remove = []
-    # Cost of current assignemnts is 0 if there's only one node
-
-    # print(f'[CALCULATE LABEL] Current Assignments: {current_assignments}')
-    # print(f'[CALCULATE LABEL] Current node: {current_node}')
-    # print(f'[CALCULATE LABEL] Current nets: {current_nets}')
-    # print(f'[CALCULATE LABEL] Current cost: {cost}')
     # Iterate through nets
     for idx, net in enumerate(current_nets):
         try:
@@ -147,20 +154,24 @@ def calculate_label(current_assignments, current_node, current_nets, cost, peek=
             # not in index. so we can skip
             pass
 
-    # if peek isn't true, Remove nets to remove from the current nets
-    if not peek:
-        for i in sorted(nets_to_remove, reverse=True):
-            current_nets.pop(i)
+    # Remove nets to remove from the current nets
+    for i in sorted(nets_to_remove, reverse=True):
+        current_nets.pop(i)
     # print(f'[CALCULATE LABEL] Current cost: {cost}')
     return cost, current_nets
 
 # Heuristic to find better initial best cost
-def init_best_cost_finder(iterations=1000):
+def init_best_cost_finder(const=7):
     global best_cost 
     global cells
     global connections
     global current_nets
     
+    iterations = int((connections/10) ** (const))
+    if iterations > 50000:
+        iterations = 50000
+    print(f"Initial random iterations: {iterations}")
+
     for p in range(iterations):
         random_cell_list = [x for x in range(cells)]
         # half on one side, half on the other.
