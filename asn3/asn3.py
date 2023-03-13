@@ -26,8 +26,8 @@ def main():
 
         # print(circuit)
         # if circuit != 'cc':
-        # if circuit != 'cm150a' and circuit != 'cm162a' and circuit != 'cm138a':
-        if circuit != 'cc':
+        if circuit != 'cm150a' and circuit != 'cm162a' and circuit != 'cm138a':
+        # if circuit != 'cc':
         # if circuit != 'z4ml':            
             continue
         x = circuits[circuit]

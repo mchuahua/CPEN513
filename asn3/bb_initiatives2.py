@@ -168,13 +168,11 @@ def init_best_cost_finder(const=7):
     global current_nets
     
     random_iterations = int((connections/10) ** (const))
-    if iterations > 15000:
+    if random_iterations > 15000:
         random_iterations = 15000
-    swapping_iterations = random_iterations/2
-        
-    print(f"Initial random iterations: {iterations}")
+    swapping_iterations = int(random_iterations/2)
 
-    for p in range(iterations):
+    for p in range(random_iterations):
         random_cell_list = [x for x in range(cells)]
         # half on one side, half on the other.
         shuffle(random_cell_list)
@@ -194,7 +192,7 @@ def init_best_cost_finder(const=7):
     print(f'Initial best cost from random heuristic: {best_cost}')
 
     if True:
-        for p in range(iterations):
+        for p in range(swapping_iterations):
             best_cost, good_left, good_right = swap_good(good_left, good_right, best_cost)
     
     print(f'Initial best cost from annealing heuristic: {best_cost}')
