@@ -22,7 +22,7 @@ If you have a good initial solution, you can prune earlier
 '''
 from copy import copy as deepcopy
 from multiprocessing import Process, Value
-from random import shuffle
+from random import shuffle, choice
 best_cost = 9999
 cells = 0
 connections = 0
@@ -167,9 +167,11 @@ def init_best_cost_finder(const=7):
     global connections
     global current_nets
     
-    iterations = int((connections/10) ** (const))
-    if iterations > 50000:
-        iterations = 50000
+    random_iterations = int((connections/10) ** (const))
+    if iterations > 15000:
+        random_iterations = 15000
+    swapping_iterations = random_iterations/2
+        
     print(f"Initial random iterations: {iterations}")
 
     for p in range(iterations):
@@ -186,5 +188,49 @@ def init_best_cost_finder(const=7):
             cost, nets = calculate_label(random_cell_list, x, nets, cost)
         if cost < best_cost:
             best_cost = cost
-    print(f'Initial best cost: {best_cost}')
+            good_left = left
+            good_right = right
+    
+    print(f'Initial best cost from random heuristic: {best_cost}')
+
+    if True:
+        for p in range(iterations):
+            best_cost, good_left, good_right = swap_good(good_left, good_right, best_cost)
+    
+    print(f'Initial best cost from annealing heuristic: {best_cost}')
+
     return best_cost
+
+def swap_good(left, right, cost):
+    '''
+    Swaps a random cell within the list and computes cost. Returns the better of: original or swapped
+    '''
+    global current_nets
+    
+    og_left = deepcopy(left)
+    og_right = deepcopy(right)
+    og_cost = deepcopy(cost)
+
+    rand_left = choice(left)
+    rand_right = choice(right)
+
+    temp_right = deepcopy([rand_right[0], 0])
+    temp_left = deepcopy([rand_left[0], 1])
+
+    left[left.index(rand_left)] = temp_right
+    right[right.index(rand_right)] = temp_left
+
+    random_cell_list = left + right
+    random_cell_list.sort(key=lambda x: x[0])
+    new_cost = 0
+    nets = deepcopy(current_nets)
+
+    # print(nets)
+    for x in random_cell_list:
+        new_cost, nets = calculate_label(random_cell_list, x, nets, new_cost)
+
+    if new_cost < og_cost:
+        # print(f'og cost: {og_cost}')
+        # print(f'new cost: {new_cost}')
+        return new_cost, left, right
+    return og_cost, og_left, og_right
