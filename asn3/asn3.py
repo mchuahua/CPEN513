@@ -6,7 +6,7 @@ from dataloader import *
 # from bb_initiatives import *
 from bb_initiatives2 import *
 from time import perf_counter
-# from plot import *
+from plot import *
 
 def main():
     global best_cost
@@ -26,9 +26,9 @@ def main():
 
         # print(circuit)
         # if circuit != 'cc':
-        if circuit != 'cm150a' and circuit != 'cm162a' and circuit != 'cm138a':
+        # if circuit != 'cm150a' and circuit != 'cm162a' and circuit != 'cm138a':
         # if circuit != 'cc':
-        # if circuit != 'z4ml':            
+        if circuit != 'cm138a':            
             continue
         x = circuits[circuit]
         
@@ -36,16 +36,16 @@ def main():
         cells = x['cells']
         
         connections = x['connections']
-        best_cost = cells
-        current_nets = x['nets']
+        best_cost = connections + 1
+        current_nets = deepcopy(x['nets'])
         
         print(circuit)
         print(f'Cells: {cells}, nets: {connections}')
         print(f'Nets: {current_nets}')
 
-        b = init_bb(best_cost, cells, connections, current_nets)
+        mincut = init_bb(circuit,best_cost, cells, connections, current_nets)
         
-        print(f'best cost: {b}')
+        print(f'best cost: {mincut}')
             
         print(f'Time elapsed: {perf_counter()-t1}')
 

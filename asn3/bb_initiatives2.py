@@ -23,6 +23,7 @@ If you have a good initial solution, you can prune earlier
 from copy import copy as deepcopy
 from multiprocessing import Process, Value
 from random import shuffle, choice
+from plot import *
 best_cost = 9999
 cells = 0
 connections = 0
@@ -30,15 +31,16 @@ left = 0
 right = 0
 current_nets = []
 
-def init_bb(best_cost1, cells1, connections1, current_nets1):
+def init_bb(name, best_cost1, cells1, connections1, current_nets1):
     global best_cost 
     global cells
     global connections
     global current_nets
+
     best_cost = best_cost1
     cells = cells1
     connections = connections1
-    current_nets = current_nets1
+    current_nets = deepcopy(current_nets1)
 
     # best_cost = 5
     best_cost = init_best_cost_finder()
@@ -46,13 +48,17 @@ def init_bb(best_cost1, cells1, connections1, current_nets1):
     left = 1
     right = 1
     globalbest = Value('i', best_cost)
-    p1 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 1]), deepcopy(current_nets), 1, 1, 0, cells, True],))    
-    p2 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 0]), deepcopy(current_nets), 2, 0, 0, cells, True],))    
+    final_assignment = []
+    p1 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 1]), deepcopy(current_nets), 1, 1, 0, cells, True, final_assignment],))    
+    p2 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 0]), deepcopy(current_nets), 2, 0, 0, cells, True, final_assignment],))    
 
     p1.start()
     p2.start()
     p1.join()
     p2.join()
+
+    plot(name, current_nets1, globalbest.value)
+
     return globalbest.value
 
 def branch_bound(input_list):
@@ -64,7 +70,7 @@ def branch_bound(input_list):
     '''
     
     global connections
-
+    
     best_cost = input_list[0]
     current_assignment = input_list[1]
     next_node_to_assign = input_list[2]
@@ -73,6 +79,7 @@ def branch_bound(input_list):
     right = input_list[5]
     cost = input_list[6]
     cells = input_list[7]
+    final_assignment = input_list[8]
     
     # print(f'best cost: {best_cost.value}')
     # print(f'cost: {cost}')
@@ -105,26 +112,30 @@ def branch_bound(input_list):
             if (peek_cost_left > -1 and peek_cost_right > -1):
                 # Do left then right if left cost is less than right cost, or the same
                 if (peek_cost_left <= peek_cost_right):
-                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_left_nets, left+1, right, peek_cost_left, cells])
-                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_right_nets, left, right+1, peek_cost_right, cells])
+                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_left_nets, left+1, right, peek_cost_left, cells, final_assignment])
+                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_right_nets, left, right+1, peek_cost_right, cells, final_assignment])
                 else: 
-                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_right_nets, left, right+1, peek_cost_right, cells])
-                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_left_nets, left+1, right, peek_cost_left, cells])
+                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_right_nets, left, right+1, peek_cost_right, cells, final_assignment])
+                    branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_left_nets, left+1, right, peek_cost_left, cells, final_assignment])
             elif (peek_cost_left > -1):
-                branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_left_nets, left+1, right, peek_cost_left, cells])                
+                branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_L, temp_left_nets, left+1, right, peek_cost_left, cells, final_assignment])                
             elif (peek_cost_right > -1):
-                branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_right_nets, left, right+1, peek_cost_right, cells])            
+                branch_bound([best_cost, deepcopy(current_assignment), temp_next_node_R, temp_right_nets, left, right+1, peek_cost_right, cells, final_assignment])            
         else:
             # If even cell size, record best cost only if left and right are equal
             if not (cells%2) and (left == right):
                 best_cost.value = cost
                 print(f'Even cost: {cost}, best cost: {best_cost.value}, left: {left}, right: {right}')
-                print(f'Current assignment: {current_assignment}')                
+                print(f'Current assignment: {current_assignment}')
+                with open('asn3.log', 'w') as writer:
+                    writer.write(str(current_assignment))
             # If odd cell size, record best cost if left and right are off by at most 1
             elif (cells%2) and (abs(left-right) < 2):
                 best_cost.value = cost
                 print(f'Odd cost: {cost}, best cost: {best_cost.value}')
                 print(f'Current assignment: {current_assignment}')
+                with open('asn3.log', 'w') as writer:
+                    writer.write(str(current_assignment))
             else:
                 # Shouldn't happen
                 assert False
@@ -188,6 +199,8 @@ def init_best_cost_finder(const=7):
             best_cost = cost
             good_left = left
             good_right = right
+            with open('asn3.log', 'w') as writer:
+                writer.write(str(random_cell_list))
     
     print(f'Initial best cost from random heuristic: {best_cost}')
 
@@ -230,5 +243,7 @@ def swap_good(left, right, cost):
     if new_cost < og_cost:
         # print(f'og cost: {og_cost}')
         # print(f'new cost: {new_cost}')
+        with open('asn3.log', 'w') as writer:
+            writer.write(str(random_cell_list))
         return new_cost, left, right
     return og_cost, og_left, og_right
