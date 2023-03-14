@@ -1,27 +1,11 @@
-# Branch and bound algorithm
-'''
+# Branch and bound algorithm with initiatives 1 and 2
 
-Goal: minimize # of edges between L and R. Keep L and R balanced
-
-Decision tree: node n is either L or R, n+1 either L or R, etc
-- n nodes = n level in tree
-
-Idea: prune tree during building (bound). Label each node in tree with cut size of subgraph at that node
-- This can be done efficiently since youre just adding single node
-
-Label of node x <= labels of all nodes in subtree below x.
-If we reach a node with label >= c, no need to construt tree below node.
-
-Depth first to a leaf for single solution, record best solution at current moment. Keep pruning. Whenever you go down to another leaf, that's the best solution
-
-Runtime highly depends on initial solution (initial partition)
-If you have a good initial solution, you can prune earlier
-(eg heuristic first)
-
-'''
+# Imports
 from copy import copy as deepcopy
 from multiprocessing import Process, Value
 from random import shuffle
+from plot import save
+# Global variables
 best_cost = 9999
 cells = 0
 connections = 0
@@ -29,6 +13,7 @@ left = 0
 right = 0
 current_nets = []
 
+# Initialize branch and bound
 def init_bb(best_cost1, cells1, connections1, current_nets1):
     global best_cost 
     global cells
@@ -39,20 +24,25 @@ def init_bb(best_cost1, cells1, connections1, current_nets1):
     connections = connections1
     current_nets = current_nets1
 
+    # INITIATIVE 2: initial random heuristic
     best_cost = init_best_cost_finder()
-
-    left = 1
-    right = 1
+    # Global best is a synchronized variable between the two processes
     globalbest = Value('i', best_cost)
+
+    # Create two parallel processes for left and right partition
     p1 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 1]), deepcopy(current_nets), 1, 1, 0, cells],))    
     p2 = Process(target=branch_bound, args=([globalbest, deepcopy([[0, 0]]), deepcopy([1, 0]), deepcopy(current_nets), 2, 0, 0, cells],))    
-
     p1.start()
     p2.start()
     p1.join()
     p2.join()
+
+    # Plot
+    plot(name, current_nets1, globalbest.value)
+
     return globalbest.value
 
+# Recursive branch and bound
 def branch_bound(input_list):
     '''
     current_assignment: list of all nodes that have been assigned, in tuple
@@ -61,8 +51,7 @@ def branch_bound(input_list):
     best_cost: best cost found
     '''
     
-    global connections
-
+    # Input list is used for multi-processing workaround, since there are a lot of args
     best_cost = input_list[0]
     current_assignment = input_list[1]
     next_node_to_assign = input_list[2]
@@ -71,8 +60,7 @@ def branch_bound(input_list):
     right = input_list[5]
     cost = input_list[6]
     cells = input_list[7]
-    # print(f'best cost: {best_cost.value}')
-    # print(f'cost: {cost}')
+
     # Calculate label of current node. 
     cost, temp_nets = calculate_label(current_assignment, next_node_to_assign, deepcopy(nets), cost)
     # PRUNING: stop calculations for additional leaf nodes if cost is greater than global cost.
@@ -92,12 +80,16 @@ def branch_bound(input_list):
             if not (cells%2) and (left == right):
                 best_cost.value = cost
                 print(f'Even cost: {cost}, best cost: {best_cost.value}, left: {left}, right: {right}')
-                print(f'Current assignment: {current_assignment}')                
+                print(f'Current assignment: {current_assignment}')               
+                with open('asn3.log', 'w') as writer:
+                    writer.write(str(current_assignment))                 
             # If odd cell size, record best cost if left and right are off by at most 1
             elif (cells%2) and (abs(left-right) < 2):
                 best_cost.value = cost
                 print(f'Odd cost: {cost}, best cost: {best_cost.value}')
                 print(f'Current assignment: {current_assignment}')
+                with open('asn3.log', 'w') as writer:
+                    writer.write(str(current_assignment))                
             else: 
                 # Shouldn't happen
                 assert False
@@ -130,22 +122,23 @@ def calculate_label(current_assignments, current_node, current_nets, cost):
     # Remove nets to remove from the current nets
     for i in sorted(nets_to_remove, reverse=True):
         current_nets.pop(i)
-    # print(f'[CALCULATE LABEL] Current cost: {cost}')
     return cost, current_nets
 
-# Heuristic to find better initial best cost
+# Heuristic to find a better initial best cost by randomly shuffling and computing cost
 def init_best_cost_finder(const=7):
     global best_cost 
     global cells
     global connections
     global current_nets
     
+    # Arbitrary cost function calculation from number of connections of the circuit
     iterations = int((connections/10) ** (const))
     print(f"Initial random iterations: {iterations}")
 
+    # Repeat for N iterations
     for p in range(iterations):
+        # Create random cell list, shuffle, then split into a balanced left and right partition.
         random_cell_list = [x for x in range(cells)]
-        # half on one side, half on the other.
         shuffle(random_cell_list)
         left = [[x, 0] for x in random_cell_list[0:int(cells/2)]]
         right = [[x, 1] for x in random_cell_list[int(cells/2):]]
@@ -153,9 +146,16 @@ def init_best_cost_finder(const=7):
         random_cell_list.sort(key=lambda x: x[0])
         cost = 0
         nets = deepcopy(current_nets)
+
+        # Compute cost for the random bi-partition
         for x in random_cell_list:
             cost, nets = calculate_label(random_cell_list, x, nets, cost)
+        
+        # Record best cost
         if cost < best_cost:
             best_cost = cost
+            save(random_cell_list)
+
     print(f'Initial best cost: {best_cost}')
+    
     return best_cost

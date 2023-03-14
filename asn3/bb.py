@@ -19,9 +19,10 @@ If you have a good initial solution, you can prune earlier
 (eg heuristic first)
 
 '''
+# Imports and global variables
 from copy import copy as deepcopy
 from random import shuffle
-
+from plot import save
 best_cost = 9999
 cells = 0
 connections = 0
@@ -29,18 +30,18 @@ left = 0
 right = 0
 current_nets = []
 
+# Initialize branch and bound
 def init_bb(best_cost1, cells1, connections1, current_nets1):
     global best_cost 
     global cells
     global connections
     global current_nets
     best_cost = best_cost1
-
     cells = cells1
     connections = connections1
     current_nets = current_nets1
-    # best_cost = init_best_cost_finder()
 
+    # Do left side then right side
     left = 1
     right = 1
     branch_bound(deepcopy([[0, 0]]), deepcopy([1, 1]), deepcopy(current_nets), deepcopy(left), deepcopy(right))
@@ -48,8 +49,12 @@ def init_bb(best_cost1, cells1, connections1, current_nets1):
     left = 2
     branch_bound(deepcopy([[0, 0]]), deepcopy([1, 0]), deepcopy(current_nets), deepcopy(left), deepcopy(right))
 
+    # Plot
+    plot(name, current_nets1, globalbest.value)
+
     return best_cost
 
+# Basic recursive branch and bound
 def branch_bound(current_assignment, next_node_to_assign, nets, left, right, cost=0):
     '''
     current_assignment: list of all nodes that have been assigned, in tuple
@@ -80,12 +85,14 @@ def branch_bound(current_assignment, next_node_to_assign, nets, left, right, cos
             if not (cells%2) and (left == right):
                 best_cost = cost
                 print(f'Even cost: {cost}, best cost: {best_cost}, left: {left}, right: {right}')
-                print(f'Current assignment: {current_assignment}')                
+                print(f'Current assignment: {current_assignment}')     
+                save(current_assignment)           
             # If odd cell size, record best cost if left and right are off by at most 1
             elif (cells%2) and (abs(left-right) < 2):
                 best_cost = cost
                 print(f'Odd cost: {cost}, best cost: {best_cost}')
                 print(f'Current assignment: {current_assignment}')
+                save(current_assignment)
             else:
                 # Shouldn't happen
                 assert False
@@ -118,30 +125,4 @@ def calculate_label(current_assignments, current_node, current_nets, cost):
     # Remove nets to remove from the current nets
     for i in sorted(nets_to_remove, reverse=True):
         current_nets.pop(i)
-    # print(f'[CALCULATE LABEL] Current cost: {cost}')
     return cost, current_nets
-
-
-# Heuristic to find better initial best cost
-def init_best_cost_finder(iterations=1000):
-    global best_cost 
-    global cells
-    global connections
-    global current_nets
-    
-    for p in range(iterations):
-        random_cell_list = [x for x in range(cells)]
-        # half on one side, half on the other.
-        shuffle(random_cell_list)
-        left = [[x, 0] for x in random_cell_list[0:int(cells/2)]]
-        right = [[x, 1] for x in random_cell_list[int(cells/2):]]
-        random_cell_list = left + right
-        random_cell_list.sort(key=lambda x: x[0])
-        cost = 0
-        nets = deepcopy(current_nets)
-        for x in random_cell_list:
-            cost, nets = calculate_label(random_cell_list, x, nets, cost)
-        if cost < best_cost:
-            best_cost = cost
-    print(f'Initial best cost: {best_cost}')
-    return best_cost
